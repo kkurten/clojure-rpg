@@ -1,17 +1,9 @@
-(ns rpg.core)
+(ns rpg.core
+  (:require [rpg.domain :refer :all]))
 
 (declare fight generate-fight)
 
-(def player {:name "John Doe"
-             :hp 1000
-             :weapon {:name "1h sword"
-                      :dmg 100}})
-(def enemy-types [{:name "Spider" :hp 50 :dmg 20}
-                  {:name "Blood elf" :hp 100 :dmg 30}
-                  {:name "Orc" :hp 200 :dmg 40}
-                  {:name "Fire elemental" :hp 150 :dmg 70}
-                  {:name "Darkhound" :hp 100 :dmg 100}
-                  {:name "Dreadlord" :hp 400 :dmg 150}])
+(def default-enemy-count 5)
 
 (defn create-enemy []
   (get enemy-types (rand-int (count enemy-types))))
@@ -98,6 +90,11 @@
     (show-intro enemies)
     (start-fight player enemies)))
 
+(defn get-enemy-count [args]
+  (let [enemy-count (first args)]
+    (if (nil? enemy-count)
+      default-enemy-count
+      (Integer/parseInt enemy-count))))
+
 (defn -main [& args]
-  (let [enemy-count (or (Integer/parseInt (first args)) 5)]
-    (run-game enemy-count)))
+  (run-game (get-enemy-count args)))
