@@ -21,6 +21,7 @@
 
 (defn attack [fighter msg]
   (let [dmg (random-dmg)]
+    (* 10000 10000)
     (println (str msg " " dmg "\n"))
     (if (> (:hp fighter) dmg)
       (update-in fighter [:hp] - dmg)
@@ -32,31 +33,40 @@
 (defn attack-enemy [enemy]
   (attack enemy "You hit enemy for"))
 
-(defn do-player-attack [player enemy]
-  (if-let [player (attack-player player)]
-    (fight player enemy)
-    (do
-      (println "You have died!\n")
-      (System/exit 0))))
-
 (defn attack-eachother [player enemy]
   (if-let [enemy (attack-enemy enemy)]
-    (do-player-attack player enemy))
+    (attack-player player))
   (do
     (println (str (:name enemy) " has died!\n"))
-    (generate-fight player)))
+    player))
+
+(defn show-health [player enemy]
+  (println (str "Your hp:" (:hp player) "\t" "Enemy hp:" (:hp enemy) "\n")))
 
 (defn fight [player enemy]
-  (println (str "Your hp:" (:hp player) "\t" "Enemy hp:" (:hp enemy) "\n"))
+  ;  (println (str "Your hp:" (:hp player) "\t" "Enemy hp:" (:hp enemy) "\n"))
   (println "Press any key to attack the enemy")
   (read-line)
-  (attack-eachother player enemy))
+  (if-let [enemy (attack-enemy enemy)]
+    (if-let [player (attack-player player)]
+      (do
+        (show-health player enemy)
+        (println "---------------------------------------------\n")
+        (recur player enemy))
+      (do
+        (println "You have died!\n")
+        (System/exit 0)))
+    (do
+      (println (str (:name enemy) " has died!\n"))
+      player)))
 
 (defn generate-fight [player]
-  (println "-----------------------------------------------")
+  (println "=============================================")
   (let [enemy (random-enemy)]
     (println (str "You have encountered an " (:name enemy) "!\n"))
-    (fight player enemy)))
+    (show-health player enemy)
+    (if-let [player (fight player enemy)]
+      (recur player))))
 
 (defn run-game []
   (generate-fight player))
